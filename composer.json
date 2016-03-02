@@ -1,10 +1,14 @@
 {
-    "name": "trianglman/sqrl",
+    "name": "barnabycolby/sqrlserver",
     "description": "PHP Server side implementation of a SQRL generator/listener",
     "authors": [
         {
             "name": "johnj",
             "email": "johnj.a.judy@gmail.com"
+        },
+        {
+            "name": "Barnaby Colby",
+            "email": "barnaby.colby@gmail.com"
         }
     ],
     "autoload": {
