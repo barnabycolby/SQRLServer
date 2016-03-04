@@ -27,15 +27,15 @@
     require_once(__DIR__.'/../vendor/autoload.php');
     require_once(__DIR__.'/../includes/ExampleStatefulStorage.php');
     session_start();
-    
-    //configuration stuff
-    $config = new \Trianglman\Sqrl\SqrlConfiguration();
-    $config->load(__DIR__.'/../config/sqrlconfig.json');
+
+    $configuration = new \Trianglman\Sqrl\SqrlConfiguration();
+    $configuration->load(__DIR__.'/../config/sqrlconfig.json');
     $store = new ExampleStatefulStorage(new \PDO('mysql:host=localhost;dbname=sqrl', 'example', 'bar'),$_SERVER['REMOTE_ADDR'],$_SESSION);
-    $generator = new \Trianglman\Sqrl\SqrlGenerate($config,$store);
-    
-    $nonce = $generator->getNonce();
+    $generator = new \Trianglman\Sqrl\SqrlGenerate($configuration, $store);
     $sqrlUrl = $generator->getUrl();
+
+    // Store the nonce in the session
+    $_SESSION['nonce'] = $generator->getNonce();
 ?>
 <!DOCTYPE html>
 <html>
@@ -47,17 +47,14 @@
         <h1>Welcome to the SQRL PHP Example Server</h1>
         
         <p>
-            This server should enable you to walk through a number of test scenarios using the SQRL protocol.
-        </p>
-        <p>
             Please use the below link/QR code to sign in and either create a new account or view your already entered account information.
         </p>
-        <p style="text-align: center;">
-            <a href="<?php echo $sqrlUrl;?>">
+        <a href="<?php echo $sqrlUrl;?>">
             <img src="sqrlImg.php" title="Click or scan to log in" alt="SQRL QR Code" />
-            </a><br />
-            <a href="<?php echo $sqrlUrl;?>"><?php echo $sqrlUrl;?></a><br />
-            <a href="/login/isNonceValidated.php">Verify Login</a><!-- This should also be automated with JavaScript for a smoother UX-->
+        </a>
+
+        <p>
+            <a href="login/isNonceValidated.php">Click here once the QR has been scanned</a>
         </p>
     </body>
 </html>
