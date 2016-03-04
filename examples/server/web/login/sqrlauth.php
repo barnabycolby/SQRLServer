@@ -25,42 +25,31 @@
  */
     namespace sqrlexample;
 
+    // Make sure that the content-type is UTF-8
+    ini_set('default_charset', 'utf-8');
+
+    // Include dependencies
     require_once(__DIR__.'/../../vendor/autoload.php');
     require_once(__DIR__.'/../../includes/ExampleStatefulStorage.php');
 
+    // Initialise the config, store and generator
     $config = new \Trianglman\Sqrl\SqrlConfiguration();
     $config->load(__DIR__.'/../../config/sqrlconfig.json');
-    $conn = new \PDO('mysql:host=localhost;dbname=sqrl', 'example', 'bar');
-    $store = new ExampleStatefulStorage($conn,$_SERVER['REMOTE_ADDR']);
-    $generator = new \Trianglman\Sqrl\SqrlGenerate($config,$store);
-    if(extension_loaded("ellipticCurveSignature")) {
-        $sigValidator = new \Trianglman\Sqrl\EcEd25519NonceValidator();
+    $store = new ExampleStatefulStorage(new \PDO('mysql:host=localhost;dbname=sqrl', 'example', 'bar'), $_SERVER['REMOTE_ADDR'], $_SESSION);
+    $generator = new \Trianglman\Sqrl\SqrlGenerate($config, $store);
+
+    // Initialise the validator
+    if (extension_loaded("ellipticCurveSignature")) {
+        $cryptoValidator = new \Trianglman\Sqrl\EcEd25519NonceValidator();
     } else {
-        $sigValidator = new \Trianglman\Sqrl\Ed25519NonceValidator();
+        $cryptoValidator = new \Trianglman\Sqrl\Ed25519NonceValidator();
     }
-    $validator = new \Trianglman\Sqrl\SqrlValidate($config,$sigValidator,$store);
-    $handler = new \Trianglman\Sqrl\SqrlRequestHandler($config,$validator,$store,$generator);
-    if (!empty($_POST)) {//this is only necessary for early clients that were not setting the Content-Type header properly
-        $post = $_POST;
-    } else {
-        $post = array();
-        parse_str(file_get_contents('php://input'), $post);
-    }
-    $handler->parseRequest($_GET, $post,$_SERVER);
-    $resp = $handler->getResponseMessage();
-    echo $resp;
-    
-    //This is extra logging code that is only being used while testing clients
-    //Production servers should not do this
-    $request = json_encode(array('get'=>$_GET,'post'=>$hardPost,'ip'=>$_SERVER['REMOTE_ADDR'],'uri'=>$_SERVER['REQUEST_URI']));
-    $decodedClient = $handler->base64URLDecode($hardPost['client']);
-    $reqHeaders = json_encode(apache_request_headers());
-    $response = $handler->base64URLDecode($resp)."\r\nerror=".$handler->error;
-    $sql = 'INSERT INTO nutTransactions (nut,request, clientData, responseData,reqHeaders) VALUES (:n,:req,:cli,:resp,:hdr)';
-    $stmt = $conn->prepare($sql);
-    $stmt->bindParam(':n', $_GET['nut']);
-    $stmt->bindParam(':req', $request);
-    $stmt->bindParam(':cli', $decodedClient);
-    $stmt->bindParam(':resp', $response);
-    $stmt->bindParam(':hdr', $reqHeaders);
-    $stmt->execute();
+    $validator = new \Trianglman\Sqrl\SqrlValidate($config, $cryptoValidator, $store);
+
+    // Initialise the request handler
+    $requestHandler = new \Trianglman\Sqrl\SqrlRequestHandler($config, $validator, $store, $generator);
+    $requestHandler->parseRequest($_GET, $_POST, $_SERVER);
+
+    // Send the response
+    $requestHandler->sendResponse();
+?>
