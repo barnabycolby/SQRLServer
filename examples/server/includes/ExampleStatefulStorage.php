@@ -169,7 +169,7 @@ class ExampleStatefulStorage implements SqrlStoreInterface
  *      `created` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
  *      `ip` INT UNSIGNED NOT NULL,
  *      `action` INT UNSIGNED NOT NULL,
- *      `related_public_key` CHAR(44) DEFAULT NULL,
+ *      `related_public_key` VARBINARY(32) DEFAULT NULL,
  *      `verified` TINYINT NOT NULL DEFAULT 0,
  *      `kill_session` TINYINT NOT NULL DEFAULT 0,
  *      `orig_nonce` CHAR(64) DEFAULT NULL,
@@ -178,9 +178,9 @@ class ExampleStatefulStorage implements SqrlStoreInterface
  * 
  * CREATE TABLE `sqrl_pubkey` (
  *      `id` INT UNSIGNED AUTO_INCREMENT NOT NULL PRIMARY KEY,
- *      `public_key` CHAR(44) NOT NULL,
- *      `vuk` CHAR(44) NOT NULL,
- *      `suk` CHAR(44) NOT NULL,
+ *      `public_key` VARBINARY(32) NOT NULL,
+ *      `vuk` VARBINARY(32) NOT NULL,
+ *      `suk` VARBINARY(32) NOT NULL,
  *      `disabled` TINYINT NOT NULL DEFAULT 0,
  *      UNIQUE (`public_key`)
  * );
