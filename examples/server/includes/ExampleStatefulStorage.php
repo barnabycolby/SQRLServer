@@ -133,11 +133,11 @@ class ExampleStatefulStorage implements SqrlStoreInterface
 
     public function storeNonce($nonce, $action, $key = '', $previousNonce = '') 
     {
-        $sql = 'INSERT INTO sqrl_nonce (nonce,ip,action,related_public_key) '
-                . 'VALUES (?,?,?,?)';
+        $sql = 'INSERT INTO sqrl_nonce (nonce,ip,action,related_public_key,orig_nonce) '
+                . 'VALUES (?,?,?,?,?)';
         $longIp = ip2long($this->reqIp);
         $stmt = $this->conn->prepare($sql);
-        $stmt->execute(array($nonce,$longIp,$action,$key));
+        $stmt->execute(array($nonce,$longIp,$action,$key,$previousNonce));
         if (empty($previousNonce)) {
             if (empty($this->session['sqrl_nut'])) {
                 $this->session['sqrl_nut'] = $nonce;
