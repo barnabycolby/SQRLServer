@@ -45,10 +45,11 @@ class SqrlGenerate implements SqrlGenerateInterface
      */
     protected $configuration = null;
     
-    public function __construct(SqrlConfiguration $config,  SqrlStoreInterface $storage)
+    public function __construct(SqrlConfiguration $config,  SqrlStoreInterface $storage, $nonce = '')
     {
         $this->configuration = $config;
         $this->store = $storage;
+        $this->nonce = $nonce;
     }
     
     /**
