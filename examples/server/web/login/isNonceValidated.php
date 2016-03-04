@@ -26,33 +26,34 @@
     namespace sqrlexample;
 
     require_once(__DIR__.'/../../vendor/autoload.php');
+    require_once(__DIR__.'/../../includes/ExampleStatefulStorage.php');
+
+    // We require access to the session state in order to get the nonce value of the session
+    session_start();
     
     $config = new \Trianglman\Sqrl\SqrlConfiguration();
     $config->load(__DIR__.'/../../config/sqrlconfig.json');
-    $db = new \PDO($config->getDsn(),$config->getUsername(),$config->getPassword());
-    $store = new \Trianglman\Sqrl\SqrlStore($config);
-    $store->setDatabaseConnection($db);
+    $store = new ExampleStatefulStorage(new \PDO('mysql:host=localhost;dbname=sqrl', 'example', 'bar'), $_SERVER['REMOTE_ADDR'], $_SESSION);
         
     $validated = false;
-    if (isset($_SESSION['nonce'])) {
-        $validated =  (int)$store->retrieveNutRecord(
-                $_SESSION['nonce'],
-                array(\Trianglman\Sqrl\SqrlStoreInterface::VERIFIED)
-                ) > 0;
-        if ($validated) {
-            //TODO: create a utility function in SqrlStore that will do this work for the developer
-            $SQL = "SELECT related_public_key FROM sqrl_nonce n JOIN sqrl_nonce_relationship r ON r.new_nonce = n.nonce WHERE r.old_nonce = ?";
-            $stmt = $db->prepare($SQL);
-            $stmt->execute(array($_SESSION['nonce']));
-            $result = $stmt->fetchColumn(0);
+    $nonce = $_SESSION['nonce'];
+    if (isset($nonce)) {
+        $isNonceValidated = $store->isNonceValidated($nonce);
+        if ($isNonceValidated == \Trianglman\Sqrl\SqrlStoreInterface::NONCE_VERIFIED) {
+            echo "<p>Validated</p></br>";
             //Update the session with a user identifier instead of the nonce
-            $_SESSION['publicKey'] = $result[0];
+            $_SESSION['publicKey'] = $store->getPublicKeyForOriginalNonce($nonce);
             unset($_SESSION['nonce']);
             unset($_SESSION['generatedTime']);
             header('Location: /account.php',true,303);
+        } else if ($isNonceValidated == \Trianglman\Sqrl\SqrlStoreInterface::NONCE_NOT_VERIFIED) {
+            echo "<p>Not validated!</p></br>";
+        } else {
+            goto NONCE_UNKNOWN;
         }
     } else {
         header('Location: /index.php',true,303);//send the user back to the index page to get a new nonce
+        NONCE_UNKNOWN:
     }
     
     

@@ -158,6 +158,41 @@ class ExampleStatefulStorage implements SqrlStoreInterface
         $stmt = $this->conn->prepare($sql);
         $stmt->execute(array($newKey, $newSuk, $newVuk, $oldKey));
     }
+
+    public function isNonceValidated($originalNonce) 
+    {
+        $nonce = $originalNonce;
+        while ($nonce) {
+            $sql = 'SELECT verified FROM sqrl_nonce WHERE nonce = ?';
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute(array($nonce));
+
+            $result = $stmt->fetchColumn();
+            if ($result === false) {
+                return self::NONCE_UNKNOWN;
+            } else if ($result === '1') {
+                return self::NONCE_VERIFIED;
+            }
+
+            // The nonce was not verified, so we need to get the next nonce in the chain and try again
+            $sql = 'SELECT nonce FROM sqrl_nonce WHERE orig_nonce = ?';
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute(array($nonce));
+            $nonce = $stmt->fetchColumn();
+        }
+        
+        // If we reach this point then there are no nonces left in the chain, and none are verified
+        return self::NONCE_NOT_VERIFIED;
+    }
+
+    public function getPublicKeyForOriginalNonce($originalNonce) {
+        $sql = "SELECT related_public_key FROM sqrl_nonce n JOIN sqrl_nonce_relationship r ON r.new_nonce = n.nonce WHERE r.old_nonce = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(array($originalNonce));
+        $result = $stmt->fetchColumn(0);
+
+        return $result[0];
+    }
 }
 
 /**

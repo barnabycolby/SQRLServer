@@ -37,6 +37,11 @@ interface SqrlStoreInterface
     
     const IDENTITY_LOCKED = 3;
 
+    // Possible return values for the isNonceValidated function
+    const NONCE_UNKNOWN = 4;
+    const NONCE_VERIFIED = 5;
+    const NONCE_NOT_VERIFIED = 6;
+
     /**
      * Stores a nonce and the related information
      *
@@ -160,4 +165,19 @@ interface SqrlStoreInterface
      * @return string
      */
     public function getSessionNonce();
+
+    /**
+     * Checks whether a nonce is validated i.e. whether the corresponding public key has been logged in
+     *
+     * @param string $nonce The nonce to check.
+     */
+    public function isNonceValidated($nonce);
+
+    /**
+     * Gets the public key associated with the given original nonce.
+     * This nonce may be the first in a chain of nonces, so the public key may not be found at the start of the chain.
+     *
+     * @param string $originalNonce  The nonce that starts the transaction chain.
+     */
+    public function getPublicKeyForOriginalNonce($originalNonce);
 }

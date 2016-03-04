@@ -63,19 +63,13 @@ class SqrlGenerate implements SqrlGenerateInterface
      */
     public function getNonce($action = 0, $key = '', $previousNonce='')
     {
+        // Generate the nonce if it doesn't exist
         if (empty($this->nonce)) {
             if ($this->store instanceof SqrlStoreStatelessAbstract) {
                 $this->nonce = $this->store->generateNut($action, $key, $previousNonce);
-                return $this->nonce;
+            } else {
+                $this->nonce = $this->generateNonce($action, $key,$previousNonce);
             }
-            if ($action === 0) {
-                $check = $this->store->getSessionNonce();
-                if (!empty($check)) {
-                    $this->nonce = $check;
-                    return $this->nonce;
-                }
-            }
-            $this->generateNonce($action, $key,$previousNonce);
         }
 
         return $this->nonce;
