@@ -28,6 +28,11 @@
     require_once(__DIR__.'/../includes/ExampleStatefulStorage.php');
     session_start();
 
+    // First we need to check whether the user is already logged in
+    if (isset($_SESSION['publicKey'])) {
+        header('Location: /account.php', true, 303);
+    }
+
     $configuration = new \Trianglman\Sqrl\SqrlConfiguration();
     $configuration->load(__DIR__.'/../config/sqrlconfig.json');
     $store = new ExampleStatefulStorage(new \PDO('mysql:host=localhost;dbname=sqrl', 'example', 'bar'),$_SERVER['REMOTE_ADDR'],$_SESSION);
