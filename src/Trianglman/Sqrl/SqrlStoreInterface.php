@@ -180,4 +180,11 @@ interface SqrlStoreInterface
      * @param string $originalNonce  The nonce that starts the transaction chain.
      */
     public function getPublicKeyForOriginalNonce($originalNonce);
+
+    /**
+     * Retrieves the account information for an account, identified by the public key. This information contains the SUK and VUK.
+     *
+     * @param string $publicKey  The public key that identities the account.
+     */
+    public function retrieveAuthenticationRecord($publicKey);
 }

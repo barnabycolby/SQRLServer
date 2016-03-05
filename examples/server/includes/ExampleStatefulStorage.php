@@ -209,6 +209,15 @@ class ExampleStatefulStorage implements SqrlStoreInterface
 
         return $publicKey;
     }
+
+    public function retrieveAuthenticationRecord($publicKey) {
+        $sql = 'SELECT vuk,suk FROM sqrl_pubkey WHERE public_key=?';
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(array($publicKey));
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return $result;
+    }
 }
 
 /**
