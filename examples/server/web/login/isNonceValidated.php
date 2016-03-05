@@ -33,9 +33,8 @@
     
     $store = new ExampleStatefulStorage(new \PDO('mysql:host=localhost;dbname=sqrl', 'example', 'bar'), $_SERVER['REMOTE_ADDR'], $_SESSION);
         
-    $validated = false;
-    $nonce = $_SESSION['nonce'];
-    if (isset($nonce)) {
+    if (isset($_SESSION['nonce'])) {
+        $nonce = $_SESSION['nonce'];
         $isNonceValidated = $store->isNonceValidated($nonce);
         if ($isNonceValidated == \Trianglman\Sqrl\SqrlStoreInterface::NONCE_VERIFIED) {
             //Update the session with a user identifier instead of the nonce
