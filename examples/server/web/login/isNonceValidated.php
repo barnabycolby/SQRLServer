@@ -31,8 +31,6 @@
     // We require access to the session state in order to get the nonce value of the session
     session_start();
     
-    $config = new \Trianglman\Sqrl\SqrlConfiguration();
-    $config->load(__DIR__.'/../../config/sqrlconfig.json');
     $store = new ExampleStatefulStorage(new \PDO('mysql:host=localhost;dbname=sqrl', 'example', 'bar'), $_SERVER['REMOTE_ADDR'], $_SESSION);
         
     $validated = false;
