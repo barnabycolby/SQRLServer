@@ -146,28 +146,28 @@ class SqrlRequestHandler implements SqrlRequestHandlerInterface
         if (!$this->validator->validateSignature(
                 $post['client'].$post['server'],
                 $clientInfo['idk'],
-                $this->base64URLDecode($post['ids'])
+                Base64Url::base64URLDecode($post['ids'])
                 )) {
             return false;
         }
         if (isset($post['urs']) && isset($clientInfo['vuk']) && !isset($clientInfo['pidk']) && !$this->validator->validateSignature(
                 $post['client'].$post['server'],
                 $clientInfo['vuk'],
-                $this->base64URLDecode($post['urs'])
+                Base64Url::base64URLDecode($post['urs'])
                 )) {
             return false;
         } 
         if (isset($post['urs']) && isset($clientInfo['vuk']) && isset($clientInfo['pidk']) && !$this->validator->validateSignature(
                 $post['client'].$post['server'],
                 $this->store->getIdentityVUK($clientInfo['pidk']),
-                $this->base64URLDecode($post['urs'])
+                Base64Url::base64URLDecode($post['urs'])
                 )) {
             return false;
         } 
         if (isset($post['pids']) && isset($clientInfo['pidk']) && !$this->validator->validateSignature(
                 $post['client'].$post['server'],
                 $clientInfo['pidk'],
-                $this->base64URLDecode($post['pids'])
+                Base64Url::base64URLDecode($post['pids'])
                 )) {
             return false;
         } 
@@ -181,7 +181,7 @@ class SqrlRequestHandler implements SqrlRequestHandlerInterface
      */
     protected function parseClient($clientInput)
     {
-        $inputAsArray = explode("\n", $this->base64URLDecode($clientInput));
+        $inputAsArray = explode("\n", Base64Url::base64URLDecode($clientInput));
         $return = array();
         foreach (array_filter($inputAsArray) as $individualInputs) {
             if (strpos($individualInputs, '=') === false) {
@@ -197,16 +197,16 @@ class SqrlRequestHandler implements SqrlRequestHandlerInterface
                     $return['actions'] = explode('~',$val);
                     break;
                 case 'idk':
-                    $return['idk']=$this->base64URLDecode($val);
+                    $return['idk']=Base64Url::base64URLDecode($val);
                     break;
                 case 'pidk':
-                    $return['pidk']=$this->base64URLDecode($val);
+                    $return['pidk']=Base64Url::base64URLDecode($val);
                     break;
                 case 'vuk':
-                    $return['vuk']=$this->base64URLDecode($val);
+                    $return['vuk']=Base64Url::base64URLDecode($val);
                     break;
                 case 'suk':
-                    $return['suk']=$this->base64URLDecode($val);
+                    $return['suk']=Base64Url::base64URLDecode($val);
                     break;
                 case 'opt':
                     $return['options'] = explode('~',$val);
@@ -218,7 +218,7 @@ class SqrlRequestHandler implements SqrlRequestHandlerInterface
     
     protected function parseServer($serverData)
     {
-        $decoded = $this->base64URLDecode($serverData);
+        $decoded = Base64Url::base64URLDecode($serverData);
         if (substr($decoded,0,7)==='sqrl://' || substr($decoded,0,6)==='qrl://'){
             return $decoded;
         } else {
@@ -366,53 +366,10 @@ class SqrlRequestHandler implements SqrlRequestHandlerInterface
             $resp.= "\r\nask=".$this->ask;
         }
         if (($this->tif&self::SQRL_DISABLED && !in_array('lock', $this->actions))) {
-            $resp.= "\r\nsuk=".$this->base64UrlEncode($this->store->getIdentitySUK($this->authenticationKey));
+            $resp.= "\r\nsuk=".Base64Url::base64UrlEncode($this->store->getIdentitySUK($this->authenticationKey));
         } elseif ($this->tif&self::PREVIOUS_ID_MATCH && !in_array('ident', $this->actions)) {
-            $resp.= "\r\nsuk=".$this->base64UrlEncode($this->store->getIdentitySUK($this->previousIdKey));
+            $resp.= "\r\nsuk=".Base64Url::base64UrlEncode($this->store->getIdentitySUK($this->previousIdKey));
         }
-        return $this->base64UrlEncode($resp);
-    }
-    
-    /**
-     * Base 64 URL encodes a string
-     * 
-     * Basically the same as base64 encoding, but replacing "+" with "-" and 
-     * "/" with "_" to make it safe to include in a URL
-     * 
-     * Optionally removes trailing "=" padding characters.
-     * 
-     * @param string $string The string to encode
-     * @param type $stripEquals [Optional] Whether to strip the "=" off of the end
-     * 
-     * @return string
-     */
-    protected function base64UrlEncode($string, $stripEquals=true)
-    {
-        $base64 = base64_encode($string);
-        $urlencode = str_replace(array('+','/'), array('-','_'), $base64);
-        if($stripEquals){
-            $urlencode = trim($urlencode, '=');
-        }
-        return $urlencode;
-    }
-    
-    /**
-     * Base 64 URL decodes a string
-     * 
-     * Basically the same as base64 decoding, but replacing URL safe "-" with "+"
-     * and "_" with "/". Automatically detects if the trailing "=" padding has
-     * been removed.
-     * 
-     * @param type $string
-     * @return type
-     */
-    protected function base64URLDecode($string)
-    {
-        $len = strlen($string);
-        if($len%4 > 0){
-            $string = str_pad($string, 4-($len%4), '=');
-        }
-        $base64 = str_replace(array('-','_'), array('+','/'), $string);
-        return base64_decode($base64);
+        return Base64Url::base64UrlEncode($resp);
     }
 }
