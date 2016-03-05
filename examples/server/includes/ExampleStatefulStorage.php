@@ -186,12 +186,28 @@ class ExampleStatefulStorage implements SqrlStoreInterface
     }
 
     public function getPublicKeyForOriginalNonce($originalNonce) {
-        $sql = "SELECT related_public_key FROM sqrl_nonce n JOIN sqrl_nonce_relationship r ON r.new_nonce = n.nonce WHERE r.old_nonce = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute(array($originalNonce));
-        $result = $stmt->fetchColumn(0);
+        // We need to follow the chain until we find a related public key
+        $publicKey = NULL;
+        $nonce = $originalNonce;
+        while ($nonce) {
+            $sql = "SELECT related_public_key,nonce FROM sqrl_nonce WHERE nonce=?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute(array($nonce));
+            $publicKey = $stmt->fetchColumn();
 
-        return $result[0];
+            // If there are no more rows to check then publicKey will be false
+            if ($publicKey !== NULL && $publicKey !== '') {
+                return $publicKey;
+            }
+
+            // The nonce was not verified, so we need to get the next nonce in the chain and try again
+            $sql = 'SELECT nonce FROM sqrl_nonce WHERE orig_nonce = ?';
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute(array($nonce));
+            $nonce = $stmt->fetchColumn();
+        }
+
+        return $publicKey;
     }
 }
 

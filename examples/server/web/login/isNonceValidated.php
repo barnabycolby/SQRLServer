@@ -40,20 +40,17 @@
     if (isset($nonce)) {
         $isNonceValidated = $store->isNonceValidated($nonce);
         if ($isNonceValidated == \Trianglman\Sqrl\SqrlStoreInterface::NONCE_VERIFIED) {
-            echo "<p>Validated</p></br>";
             //Update the session with a user identifier instead of the nonce
             $_SESSION['publicKey'] = $store->getPublicKeyForOriginalNonce($nonce);
             unset($_SESSION['nonce']);
             unset($_SESSION['generatedTime']);
             header('Location: /account.php',true,303);
-        } else if ($isNonceValidated == \Trianglman\Sqrl\SqrlStoreInterface::NONCE_NOT_VERIFIED) {
-            echo "<p>Not validated!</p></br>";
-        } else {
+        } else if ($isNonceValidated == \Trianglman\Sqrl\SqrlStoreInterface::NONCE_UNKNOWN) {
             goto NONCE_UNKNOWN;
         }
     } else {
-        header('Location: /index.php',true,303);//send the user back to the index page to get a new nonce
         NONCE_UNKNOWN:
+        header('Location: /index.php',true,303);//send the user back to the index page to get a new nonce
     }
     
     
