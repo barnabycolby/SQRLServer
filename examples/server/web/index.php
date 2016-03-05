@@ -46,7 +46,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>SQRL Example Server</title>
+        <title>Home | SQRL Demonstration Server</title>
 
         <!-- This embedded javascript handles the background authentication check -->
         <script type="text/javascript">
@@ -84,17 +84,17 @@
         </script>
     </head>
     <body>
-        <h1>Welcome to the SQRL PHP Example Server</h1>
+        <h1>Welcome to the SQRL Demonstration Server</h1>
         
         <p>
-            Please use the below link/QR code to sign in and either create a new account or view your already entered account information.
+            Please click or scan the QR code to log in.
         </p>
         <a href="<?php echo $sqrlUrl;?>">
             <img src="sqrlImg.php" title="Click or scan to log in" alt="SQRL QR Code" />
         </a>
 
         <p>
-            <a href="login/isNonceValidated.php">Click here once the QR has been scanned</a>
+            <a href="login/isNonceValidated.php">Click here if the page does not automatically refesh</a>
         </p>
     </body>
 </html>

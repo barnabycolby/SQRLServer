@@ -55,7 +55,7 @@
 
 <html>
   <head>
-    <title>Verifying Login...</title>
+    <title>Verifying Login... | SQRL Demonstration Server</title>
     <?php if (isset($_SESSION['nonce'])): ?>
     <META http-equiv="refresh" content="5;URL=/login/isNonceValidated.php">
     <?php endif;?>
@@ -63,7 +63,7 @@
   <body>
       <p>
           <?php if (isset($_SESSION['nonce'])): ?>
-          Your log in has not been validated. This page will refresh in 5 seconds. <a href="/login/isNonceValidated.php">Click here to check again.</a>
+          Your login has not yet been validated. If this page does not refresh in 5 seconds <a href="/login/isNonceValidated.php">click here</a>.
           <?php endif;?>
       </p>
   </body>

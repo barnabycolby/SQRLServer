@@ -45,7 +45,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>SQRL Account</title>
+        <title>Account | SQRL Demonstration Server</title>
     </head>
     <body>
         <h1>You have successfully signed in using SQRL</h1>
