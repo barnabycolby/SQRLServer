@@ -47,6 +47,41 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>SQRL Example Server</title>
+
+        <!-- This embedded javascript handles the background authentication check -->
+        <script type="text/javascript">
+            (function () {
+                /**
+                 * Asynchronously checks whether the session nonce has been validated.
+                 * If it has, then the browser is redirected to the account page.
+                 */
+                var checkIfNonceIsValidated = function () {
+                    var httpRequest = new XMLHttpRequest();
+                    if (!httpRequest) {
+                        // If we can't create an XMLHttpRequest object then we just give up
+                        return;
+                    }
+
+                    httpRequest.onreadystatechange = function() {
+                        // Check that the request has completed successfully
+                        if (httpRequest.readyState !== XMLHttpRequest.DONE || httpRequest.status !== 200) {
+                            return;
+                        }
+
+                        // If the user is authenticated, redirect to the account page
+                        if (httpRequest.responseText === '1') {
+                            window.location = '/account.php';
+                        }
+                    };
+
+                    httpRequest.open('GET', 'https://sqrldemo.barnabycolby.io/login/isNonceValidatedAjaxCheck.php', true);
+                    httpRequest.send(null);
+                };
+
+                // We check whether the user has been authenticated on a timer, so that they are logged in without having to do anything
+                window.setInterval(checkIfNonceIsValidated, 3000);
+            }());
+        </script>
     </head>
     <body>
         <h1>Welcome to the SQRL PHP Example Server</h1>
